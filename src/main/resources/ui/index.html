@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>JCEF Frontend</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; }
+        button { padding: 10px 15px; margin: 5px; font-size: 14px; cursor: pointer; }
+        .box { border: 1px solid #ccc; padding: 15px; background: white; margin-top: 15px; border-radius: 5px; }
+        #output { color: blue; font-weight: bold; }
+        #java-output { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<h1>Giao diện Web (JCEF Frontend)</h1>
+
+<!-- 1. JS gọi Java gửi tham số -->
+<div class="box">
+    <h3>Chiều 1A: Gửi tên lên Java để nhận câu chào</h3>
+    <input type="text" id="txtName" value="Thiên Phú">
+    <button onclick="sendToJava()">Gửi lên Java</button>
+    <p>Phản hồi từ Java: <span id="output">Chưa có</span></p>
+</div>
+
+<!-- 2. JS gọi Java kích hoạt hành động UI -->
+<div class="box">
+    <h3>Chiều 1B: Kích hoạt Action của hệ thống</h3>
+    <button onclick="triggerJavaUI()">Mở thông báo JDialog của Java</button>
+</div>
+
+<!-- 3. Nơi hiển thị khi Java chủ động gọi JS -->
+<div class="box">
+    <h3>Chiều 2: Lắng nghe dữ liệu do Java chủ động gửi xuống</h3>
+    <p>Dữ liệu nhận được: <span id="java-output">Đang đợi Java bấm nút...</span></p>
+</div>
+<div>
+    <a href="b.html">chuyển trang</a>
+    <a href="tailwind.html">chuyển trang</a>
+</div>
+<script>
+    // --- CHIỀU 1: JS gọi Java bằng hàm window.cefQuery ---
+    function sendToJava() {
+        const name = document.getElementById('txtName').value;
+
+        // window.cefQuery được JCEF tự động tiêm vào môi trường trình duyệt
+        window.cefQuery({
+            request: "sayHello:" + name,
+            onSuccess: function(response) {
+                // Nhận kết quả từ callback.success() trong Java
+                document.getElementById('output').innerText = response;
+            },
+            onFailure: function(error_code, error_message) {
+                console.error("Lỗi:", error_message);
+            }
+        });
+    }
+
+    function triggerJavaUI() {
+        window.cefQuery({
+            request: "triggerJavaAction",
+            onSuccess: function(response) {
+                console.log(response);
+            }
+        });
+    }
+
+    // --- CHIỀU 2: Hàm xử lý khi Java gọi bằng executeJavaScript ---
+    function receiveFromJava(message) {
+        document.getElementById('java-output').innerText = message;
+    }
+
+    // Lắng nghe sự kiện nhấn phím trên toàn bộ trang Web
+    window.addEventListener('keydown', function (event) {
+        // Kiểm tra nếu phím bấm là F12 (Mã phím: "F12")
+        if (event.key === 'F12') {
+            event.preventDefault(); // Chặn hành vi mặc định của trình duyệt
+
+            // Gửi lệnh yêu cầu Java mở DevTools qua cefQuery
+            if (typeof window.cefQuery === 'function') {
+                window.cefQuery({
+                    request: "open_devtools_panel",
+                    onSuccess: function(response) {
+                        console.log("Java phản hồi: " + response);
+                    }
+                });
+            }
+        }
+    });
+</script>
+</body>
+</html>
