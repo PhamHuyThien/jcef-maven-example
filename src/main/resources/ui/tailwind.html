@@ -28,7 +28,20 @@
             <div class="px-4">Navbar Title</div>
         </nav>
         <!-- Page content here -->
-        <div class="p-4">Page Content</div>
+        <div class="p-4">
+            <p>Page Content</p>
+            <input type="text" class="input" placeholder="Which browser do you use" list="browsers" />
+            <datalist id="browsers">
+                <option value="Chrome"></option>
+                <option value="Firefox"></option>
+                <option value="Safari"></option>
+                <option value="Opera"></option>
+                <option value="Edge"></option>
+            </datalist>
+            <input type="date" class="input" />
+            <input type="time" class="input" />
+            <input type="checkbox" checked="checked" class="toggle" />
+        </div>
     </div>
 
     <div class="drawer-side is-drawer-close:overflow-visible">
@@ -70,17 +83,6 @@
         </div>
     </div>
 </div>
-<input type="text" class="input" placeholder="Which browser do you use" list="browsers" />
-<datalist id="browsers">
-    <option value="Chrome"></option>
-    <option value="Firefox"></option>
-    <option value="Safari"></option>
-    <option value="Opera"></option>
-    <option value="Edge"></option>
-</datalist>
-<input type="date" class="input" />
-<input type="time" class="input" />
-<input type="checkbox" checked="checked" class="toggle" />
 <footer class="footer sm:footer-horizontal bg-base-200 text-base-content p-10">
     <nav>
         <h6 class="footer-title">Services</h6>
@@ -108,15 +110,30 @@
             <label>Enter your email address</label>
             <div class="join">
                 <input
+                        id="email-subscribe"
                         type="text"
                         placeholder="username@site.com"
                         class="input input-bordered join-item"/>
-                <button class="btn btn-primary join-item"
+                <button class="btn btn-primary join-item" onclick="subscribe()"
                         >Subscribe
                 </button>
             </div>
         </fieldset>
     </form>
 </footer>
+<script>
+    function subscribe() {
+        let email = document.getElementById('email-subscribe').value;
+        window.cefQuery({
+            request: JSON.stringify(['subscribe', {email}]),
+            onSuccess: function (response) {
+                alert(response);
+            },
+            onFailure: function (code, msg) {
+                alert(code + " - " + msg);
+            }
+        })
+    }
+</script>
 </body>
 </html>

@@ -36,6 +36,17 @@
             <artifactId>logback-classic</artifactId>
             <version>1.5.18</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.22.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.22.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -60,34 +71,34 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.github.wvengen</groupId>
-                <artifactId>proguard-maven-plugin</artifactId>
-                <version>2.6.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>proguard</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <!-- Bật tính năng làm rối mã nguồn -->
-                    <obfuscate>true</obfuscate>
-                    <proguardInclude>${basedir}/proguard.pro</proguardInclude>
-                    <libs>
-                        <!-- Liên kết với thư viện JDK 17 đang chạy -->
-                        <lib>${java.home}/lib/jrt-fs.jar</lib>
-                        <lib>${java.home}/jmods/java.base.jmod</lib>
-                        <lib>${java.home}/jmods/java.desktop.jmod</lib>
-                        <lib>${java.home}/jmods/java.logging.jmod</lib>
-                        <lib>${java.home}/jmods/java.sql.jmod</lib>
-                        <lib>${java.home}/jmods/java.net.http.jmod</lib>
-                        <lib>${java.home}/jmods/jdk.httpserver.jmod</lib>
-                    </libs>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>com.github.wvengen</groupId>-->
+<!--                <artifactId>proguard-maven-plugin</artifactId>-->
+<!--                <version>2.6.1</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>proguard</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <configuration>-->
+<!--                    &lt;!&ndash; Bật tính năng làm rối mã nguồn &ndash;&gt;-->
+<!--                    <obfuscate>true</obfuscate>-->
+<!--                    <proguardInclude>${basedir}/proguard.pro</proguardInclude>-->
+<!--                    <libs>-->
+<!--                        &lt;!&ndash; Liên kết với thư viện JDK 17 đang chạy &ndash;&gt;-->
+<!--                        <lib>${java.home}/lib/jrt-fs.jar</lib>-->
+<!--                        <lib>${java.home}/jmods/java.base.jmod</lib>-->
+<!--                        <lib>${java.home}/jmods/java.desktop.jmod</lib>-->
+<!--                        <lib>${java.home}/jmods/java.logging.jmod</lib>-->
+<!--                        <lib>${java.home}/jmods/java.sql.jmod</lib>-->
+<!--                        <lib>${java.home}/jmods/java.net.http.jmod</lib>-->
+<!--                        <lib>${java.home}/jmods/jdk.httpserver.jmod</lib>-->
+<!--                    </libs>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>

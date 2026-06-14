@@ -6,12 +6,18 @@
     <title>Document</title>
 </head>
 <body>
-BỐ M CHỊU RỒI
+<button onclick="sendBroadcast()">send broadcast</button>
 <script>
-    app.hello("Bro");
 
-    let user = app.getUser();
-    alert(user)
+    function sendBroadcast() {
+        window.cefQuery({
+            request: JSON.stringify(['broadcast', 'abc', '123'])
+        })
+    }
+
+    function onBroadcastMessage(topic, data) {
+        alert('topic=' + topic + ', data=' + JSON.stringify(data))
+    }
 </script>
 </body>
 </html>

@@ -37,6 +37,7 @@
 <div>
     <a href="b.html">chuyển trang</a>
     <a href="tailwind.html">chuyển trang</a>
+    <button onclick="sendBroadcast()">send broadcast</button>
 </div>
 <script>
     // --- CHIỀU 1: JS gọi Java bằng hàm window.cefQuery ---
@@ -45,7 +46,7 @@
 
         // window.cefQuery được JCEF tự động tiêm vào môi trường trình duyệt
         window.cefQuery({
-            request: "sayHello:" + name,
+            request: JSON.stringify(['sayHello', {name}]),
             onSuccess: function(response) {
                 // Nhận kết quả từ callback.success() trong Java
                 document.getElementById('output').innerText = response;
@@ -58,35 +59,26 @@
 
     function triggerJavaUI() {
         window.cefQuery({
-            request: "triggerJavaAction",
+            request: JSON.stringify(["triggerJavaAction"]),
             onSuccess: function(response) {
                 console.log(response);
             }
         });
     }
 
-    // --- CHIỀU 2: Hàm xử lý khi Java gọi bằng executeJavaScript ---
-    function receiveFromJava(message) {
+    function sendBroadcast() {
+        window.cefQuery({
+            request: JSON.stringify(['broadcast', 'abc', {name: 'thien'}])
+        })
+    }
+
+    function onCefMessage(type, message) {
         document.getElementById('java-output').innerText = message;
     }
 
-    // Lắng nghe sự kiện nhấn phím trên toàn bộ trang Web
-    window.addEventListener('keydown', function (event) {
-        // Kiểm tra nếu phím bấm là F12 (Mã phím: "F12")
-        if (event.key === 'F12') {
-            event.preventDefault(); // Chặn hành vi mặc định của trình duyệt
-
-            // Gửi lệnh yêu cầu Java mở DevTools qua cefQuery
-            if (typeof window.cefQuery === 'function') {
-                window.cefQuery({
-                    request: "open_devtools_panel",
-                    onSuccess: function(response) {
-                        console.log("Java phản hồi: " + response);
-                    }
-                });
-            }
-        }
-    });
+    function onBroadcastMessage(topic, data) {
+        alert('topic=' + topic + ', data=' + JSON.stringify(data))
+    }
 </script>
 </body>
 </html>
