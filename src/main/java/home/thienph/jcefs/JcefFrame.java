@@ -36,15 +36,15 @@ public class JcefFrame extends JFrame {
     private static final String QUERY_FUNC_NAME = "cefQuery";
     private static final String QUERY_CANCEL_FUNC_NAME = "cefQueryCancel";
 
-    @JsonProperty
+    @JsonProperty("id")
     private final String id;
-    @JsonProperty
+    @JsonProperty("url")
     private final String url;
     @Setter
     private boolean openDevTools;
-    @JsonProperty
+    @JsonProperty("isMain")
     private boolean isMain;
-    @JsonProperty
+    @JsonProperty("isInitialized")
     private boolean isInitialized;
 
     private CefClient client;

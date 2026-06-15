@@ -71,34 +71,34 @@
                     </execution>
                 </executions>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>com.github.wvengen</groupId>-->
-<!--                <artifactId>proguard-maven-plugin</artifactId>-->
-<!--                <version>2.6.1</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>proguard</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    &lt;!&ndash; Bật tính năng làm rối mã nguồn &ndash;&gt;-->
-<!--                    <obfuscate>true</obfuscate>-->
-<!--                    <proguardInclude>${basedir}/proguard.pro</proguardInclude>-->
-<!--                    <libs>-->
-<!--                        &lt;!&ndash; Liên kết với thư viện JDK 17 đang chạy &ndash;&gt;-->
-<!--                        <lib>${java.home}/lib/jrt-fs.jar</lib>-->
-<!--                        <lib>${java.home}/jmods/java.base.jmod</lib>-->
-<!--                        <lib>${java.home}/jmods/java.desktop.jmod</lib>-->
-<!--                        <lib>${java.home}/jmods/java.logging.jmod</lib>-->
-<!--                        <lib>${java.home}/jmods/java.sql.jmod</lib>-->
-<!--                        <lib>${java.home}/jmods/java.net.http.jmod</lib>-->
-<!--                        <lib>${java.home}/jmods/jdk.httpserver.jmod</lib>-->
-<!--                    </libs>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>2.6.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>proguard</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- Bật tính năng làm rối mã nguồn -->
+                    <obfuscate>true</obfuscate>
+                    <proguardInclude>${basedir}/proguard.pro</proguardInclude>
+                    <libs>
+                        <!-- Liên kết với thư viện JDK 17 đang chạy -->
+                        <lib>${java.home}/lib/jrt-fs.jar</lib>
+                        <lib>${java.home}/jmods/java.base.jmod</lib>
+                        <lib>${java.home}/jmods/java.desktop.jmod</lib>
+                        <lib>${java.home}/jmods/java.logging.jmod</lib>
+                        <lib>${java.home}/jmods/java.sql.jmod</lib>
+                        <lib>${java.home}/jmods/java.net.http.jmod</lib>
+                        <lib>${java.home}/jmods/jdk.httpserver.jmod</lib>
+                    </libs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
@@ -113,7 +113,7 @@
                         <configuration>
                             <headerType>gui</headerType>
                             <!-- Tên file .exe muốn xuất ra trong thư mục target -->
-                            <outfile>${basedir}/JcefTestApp.exe</outfile>
+                            <outfile>${basedir}/JcefApp.exe</outfile>
                             <!-- Đường dẫn tới file Fat JAR do plugin shade tạo ra trước đó -->
                             <jar>${project.build.directory}/${project.artifactId}-${project.version}.jar</jar>
                             <!-- Tên lớp chứa hàm main của bạn -->

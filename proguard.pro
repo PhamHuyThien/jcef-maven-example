@@ -34,3 +34,39 @@
 -keep public class home.thienph.Main {
     public static void main(java.lang.String[]);
 }
+
+# ====================================================================
+# 1. BẢO VỆ CẤU TRÚC THƯ MỤC VÀ SERVICES CHO LOGBACK (QUAN TRỌNG NHẤT)
+# ====================================================================
+# Bắt buộc phải có để Logback nạp được META-INF/services/ qua ServiceLoader
+-keepdirectories
+
+# ====================================================================
+# 1. BẢO VỆ CẤU TRÚC THƯ MỤC VÀ SERVICES CHO LOGBACK
+# ====================================================================
+# Giữ lại toàn bộ cấu trúc thư mục (rất quan trọng để Logback tìm thấy META-INF)
+-keepdirectories META-INF/**
+-keepdirectories ch.qos.logback.**
+-keepdirectories org.slf4j.**
+
+# Đảm bảo nội dung các file service không bị thay đổi nếu có mapping class
+-adaptresourcefilenames **
+-adaptresourcefilecontents META-INF/services/**,logback.xml
+
+# ====================================================================
+# 2. GIỮ NGUYÊN VẸN LOGBACK VÀ SLF4J
+# ====================================================================
+-keep class ch.qos.logback.** { *; }
+-keep class org.slf4j.** { *; }
+
+# ====================================================================
+# 3. BẢO VỆ CÁC PHƯƠNG THỨC ENUM VÀ THUỘC TÍNH REFLECTION
+# ====================================================================
+# Logback cần các hàm này để parse chuỗi cấu hình trong logback.xml thành Enum
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# Giữ lại các meta-data cần thiết cho Reflection
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,Exceptions

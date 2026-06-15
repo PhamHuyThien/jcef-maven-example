@@ -28,6 +28,7 @@ public class JsonUtils {
         try {
             return OBJECT_MAPPER.writeValueAsString(o);
         } catch (JsonProcessingException e) {
+            log.error("Failed to serialize object to JSON", e);
             return null;
         }
     }
@@ -36,11 +37,17 @@ public class JsonUtils {
         try {
             return OBJECT_MAPPER.readValue(json, clazz);
         } catch (JsonProcessingException e) {
+            log.error("Failed to deserialize JSON to object", e);
             return null;
         }
     }
 
     public static <T> T fromJson(Object data, Class<T> clazz) {
-        return OBJECT_MAPPER.convertValue(data, clazz);
+        try {
+            return OBJECT_MAPPER.convertValue(data, clazz);
+        } catch (Exception e) {
+            log.error("Failed to convert object to JSON", e);
+            return null;
+        }
     }
 }

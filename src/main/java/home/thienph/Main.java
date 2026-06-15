@@ -27,8 +27,12 @@ public class Main {
     private static final Thread shutdownHook = ThrUtils.newNamedThread("shutdown", Main::shutdownHook);
 
 
-    @SneakyThrows
     public static void main(String[] args) {
+        start();
+    }
+
+    @SneakyThrows
+    public static void start() {
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
         if (AppLockManager.isAppAlreadyRunning()) {

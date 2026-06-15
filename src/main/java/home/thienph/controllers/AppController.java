@@ -28,7 +28,7 @@ public class AppController {
 
     @OnCefMessage("showJcefFrame")
     public void showJcefFrame(String title) {
-        JcefManager.getJcefFrameByTitle(title).forEach(JcefFrame -> JcefFrame.setVisible(true));
+        JcefManager.getJcefFrameByTitle(title).forEach(JcefFrame -> SwingUtilities.invokeLater(() -> JcefFrame.setVisible(true)));
     }
 
     @OnCefMessage("switchScreen")

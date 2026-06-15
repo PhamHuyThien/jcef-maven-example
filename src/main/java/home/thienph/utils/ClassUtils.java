@@ -4,10 +4,8 @@ import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.JarURLConnection;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -15,47 +13,81 @@ import java.util.jar.JarFile;
 public class ClassUtils {
 
     /**
-     * Hàm chính: Tìm kiếm tất cả các class trong package (Hỗ trợ cả IDE và File JAR)
+     * Quét Class bằng chuỗi Package - Tương thích IDE, File JAR và File .EXE (jlauncher, launch4j...)
      */
     @SneakyThrows
     public static Set<Class<?>> findClasses(String basePackage) {
         Set<Class<?>> classes = new HashSet<>();
-        String path = basePackage.replace('.', '/');
+        String packagePath = basePackage.replace('.', '/') + "/"; // "home/thienph/"
 
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if (classLoader == null) classLoader = ClassUtils.class.getClassLoader();
-        if (classLoader == null) classLoader = ClassLoader.getSystemClassLoader();
+        // Sử dụng LinkedHashSet để giữ thứ tự ưu tiên và tự động loại bỏ các đường dẫn trùng lặp
+        Set<File> rootsToScan = new LinkedHashSet<>();
 
-        // Lấy tất cả tài nguyên khớp với đường dẫn package
-        Enumeration<URL> resources = classLoader.getResources(path);
+        // HƯỚNG 1: Định vị dựa theo vị trí của chính lớp ClassUtils này
+        try {
+            URL codeSourceUrl = ClassUtils.class.getProtectionDomain().getCodeSource().getLocation();
+            if (codeSourceUrl != null) {
+                String codeSourcePath = Paths.get(codeSourceUrl.toURI()).toAbsolutePath().toString();
+                rootsToScan.add(new File(codeSourcePath));
+            }
+        } catch (Exception ignored) {
+            // Bỏ qua nếu môi trường native chặn lấy CodeSource
+        }
 
-        while (resources.hasMoreElements()) {
-            URL resource = resources.nextElement();
-            String protocol = resource.getProtocol();
+        // HƯỚNG 2: Vét cạn toàn bộ các đường dẫn trong Classpath hệ thống (Cực kỳ quan trọng đối với các bộ launcher EXE)
+        String classpath = System.getProperty("java.class.path");
+        if (classpath != null && !classpath.isEmpty()) {
+            String[] pathElements = classpath.split(File.pathSeparator);
+            for (String element : pathElements) {
+                rootsToScan.add(new File(element).getAbsoluteFile());
+            }
+        }
 
-            if ("file".equals(protocol)) {
-                // TRƯỜNG HỢP 1: Chạy trong IDE (Thư mục thông thường)
-                String filePath = URLDecoder.decode(resource.getFile(), StandardCharsets.UTF_8);
-                scanDirectory(new File(filePath), basePackage, classes);
+        // Bắt đầu quét qua tất cả các vị trí tài nguyên tìm được
+        for (File root : rootsToScan) {
+            if (!root.exists()) continue;
 
-            } else if ("jar".equals(protocol)) {
-                // TRƯỜNG HỢP 2: Chạy từ file JAR đóng gói
-                scanJar(resource, path, classes);
+            if (root.isDirectory()) {
+                // TRƯỜNG HỢP 1: Chạy trong IDE (Có thư mục target/classes vật lý)
+                File packageDir = new File(root, packagePath);
+                scanDirectory(packageDir, basePackage, classes);
+            } else if (root.isFile()) {
+                // TRƯỜNG HỢP 2: Chạy từ file JAR hoặc file .EXE đã đóng gói
+                // Loại bỏ điều kiện check đuôi ".jar", cố gắng mở bằng JarFile để đọc cấu trúc nén bên trong
+                try (JarFile jar = new JarFile(root)) {
+                    Enumeration<JarEntry> entries = jar.entries();
+
+                    while (entries.hasMoreElements()) {
+                        JarEntry entry = entries.nextElement();
+                        String name = entry.getName();
+
+                        // Tìm các file .class nằm trong luồng package mục tiêu
+                        if (name.startsWith(packagePath) && name.endsWith(".class")) {
+                            String className = name.replace('/', '.').substring(0, name.length() - 6);
+                            try {
+                                classes.add(Class.forName(className));
+                            } catch (Throwable ignored) {
+                                // Bỏ qua nếu class lỗi liên kết hệ thống hoặc chưa được obfuscate đồng bộ
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    // Nếu không phải file cấu trúc nén ZIP/JAR hợp lệ (ví dụ file exe thuần hệ thống), bỏ qua an toàn
+                }
             }
         }
         return classes;
     }
 
     /**
-     * Quét đệ quy trong thư mục (Dành cho IDE)
+     * Quét đệ quy trong thư mục (Dành cho môi trường IDE)
      */
     private static void scanDirectory(File directory, String currentPackage, Set<Class<?>> classes) throws Exception {
         if (!directory.exists() || directory.listFiles() == null) return;
 
         for (File file : Objects.requireNonNull(directory.listFiles())) {
             if (file.isDirectory()) {
-                String subPackageName = currentPackage + "." + file.getName();
-                scanDirectory(file, subPackageName, classes);
+                scanDirectory(file, currentPackage + "." + file.getName(), classes);
             } else if (file.getName().endsWith(".class")) {
                 String className = currentPackage + "." + file.getName().replace(".class", "");
                 classes.add(Class.forName(className));
@@ -64,40 +96,11 @@ public class ClassUtils {
     }
 
     /**
-     * Quét các phần tử bên trong file JAR (Dành cho file đóng gói)
-     */
-    private static void scanJar(URL resource, String packagePath, Set<Class<?>> classes) throws Exception {
-        // Kết nối và mở file JAR
-        JarURLConnection jarURLConnection = (JarURLConnection) resource.openConnection();
-        try (JarFile jar = jarURLConnection.getJarFile()) {
-            Enumeration<JarEntry> entries = jar.entries();
-
-            while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                String name = entry.getName();
-
-                // Kiểm tra xem phần tử này có nằm trong package mục tiêu và phải là file .class không
-                if (name.startsWith(packagePath) && name.endsWith(".class")) {
-                    // Chuyển đổi đường dẫn file nén "home/thienph/Main.class" thành "home.thienph.Main"
-                    String className = name.replace('/', '.').substring(0, name.length() - 6);
-                    try {
-                        classes.add(Class.forName(className));
-                    } catch (ClassNotFoundException e) {
-                        // Bỏ qua nếu có class lỗi cấu trúc hệ thống
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Hàm Helper: Nếu thiếu dữ liệu, ép về null đối với Object.
-     * Nhưng đối với kiểu nguyên thủy (primitive) như int, boolean, long... thì PHẢI gán giá trị mặc định (0, false)
-     * nếu không Java Reflection sẽ ném lỗi IllegalArgumentException khi invoke.
+     * Hàm Helper giữ nguyên từ code gốc của bạn để gán giá trị mặc định cho Primitive types khi dùng Reflection
      */
     public static Object getDefaultValueForPrimitive(Class<?> type) {
         if (!type.isPrimitive()) {
-            return null; // Các kiểu Object (String, DTO, List...) thiếu thì thoải mái để null
+            return null;
         }
         if (type == boolean.class) return false;
         if (type == int.class) return 0;
