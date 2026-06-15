@@ -4,7 +4,8 @@ import home.thienph.Main;
 import home.thienph.anotations.CefController;
 import home.thienph.anotations.OnCefMessage;
 import home.thienph.exceptions.ResponseException;
-import home.thienph.jcefs.JcefWindow;
+import home.thienph.jcefs.JcefFrame;
+import home.thienph.utils.ClassUtils;
 import home.thienph.utils.JsonUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -36,8 +37,7 @@ public class CefMessageDispatcher {
         }
     }
 
-    public static Object dispatch(JcefWindow jcefWindow, Object[] data) throws Exception {
-        if (jcefWindow == null) throw new ResponseException(500, "jcefWindow not found");
+    public static Object dispatch(JcefFrame jcefFrame, Object[] data) throws Exception {
         if (data == null || data.length == 0)
             throw new ResponseException(500, "data request wrong format");
 
@@ -47,27 +47,41 @@ public class CefMessageDispatcher {
         }
 
         Class<?>[] paramTypes = handler.method.getParameterTypes();
-
-        // Kiểm tra số lượng tham số truyền từ Frontend (data)
-        // phải khớp với số lượng tham số của hàm Java (paramTypes)
-        // data có data[0] là tên hàm, paramTypes có paramTypes[0] là JcefWindow
-        if (data.length != paramTypes.length) {
-            throw new ResponseException(400, "parameter length mismatch");
-        }
-
-        // Tạo 1 mảng gộp chứa tất cả các đối số thực tế sẽ nạp vào hàm invoke
         Object[] finalArgs = new Object[paramTypes.length];
 
-        // Đối số đầu tiên LUÔN LUÔN là jcefWindow
-        finalArgs[0] = jcefWindow;
+        // Kiểm tra xem tham số đầu tiên của hàm Java có phải là JcefFrame hay không
+        boolean hasFrameParam = paramTypes.length > 0 && paramTypes[0] == JcefFrame.class;
 
-        // Vòng lặp parse các tham số còn lại (từ vị trí số 1 trở đi)
-        for (int i = 1; i < paramTypes.length; i++) {
-            // data[i] tương ứng với paramTypes[i]
-            finalArgs[i] = JsonUtils.fromJson(data[i], paramTypes[i]);
+        if (hasFrameParam) {
+            if (jcefFrame == null) throw new ResponseException(500, "jcefFrame not found but required");
+            finalArgs[0] = jcefFrame;
         }
 
-        // Truyền toàn bộ mảng gộp finalArgs vào đối số thứ 2 của hàm invoke
+        // Vòng lặp duyệt qua tất cả tham số của hàm Java để nạp dữ liệu
+        // Nếu có JcefFrame: Điền data từ index 1 của Java. Khớp với index 1 của Frontend.
+        // Nếu KHÔNG có JcefFrame: Điền data từ index 0 của Java. Khớp với index 1 của Frontend.
+        int javaStartIdx = hasFrameParam ? 1 : 0;
+
+        for (int i = javaStartIdx; i < paramTypes.length; i++) {
+            // Tính toán vị trí tương ứng của dữ liệu lấy từ Frontend (data)
+            // Vì data[0] là tên hàm, nên tham số truyền lên thực tế bắt đầu từ data[1], data[2]...
+            int frontendIdx = i + (hasFrameParam ? 0 : 1);
+
+            // NÂNG CẤP: Nếu vị trí này phía Frontend không cung cấp -> Điền giá trị thiếu (null/default)
+            if (frontendIdx >= data.length) {
+                finalArgs[i] = ClassUtils.getDefaultValueForPrimitive(paramTypes[i]);
+                continue;
+            }
+
+            // Nếu có dữ liệu, tiến hành parse qua Jackson
+            if (data[frontendIdx] == null) {
+                finalArgs[i] = ClassUtils.getDefaultValueForPrimitive(paramTypes[i]);
+            } else {
+                finalArgs[i] = JsonUtils.fromJson(data[frontendIdx], paramTypes[i]);
+            }
+        }
+
+        // Tự động loại bỏ dữ liệu thừa: Mọi phần tử frontendIdx >= data.length đều đã được xử lý an toàn
         return handler.method.invoke(handler.instance, finalArgs);
     }
 

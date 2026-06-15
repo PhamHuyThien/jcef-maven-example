@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+</head>
+<body>
+<div class="box">
+    <h3>Tin nhắn riêng: Lắng nghe dữ liệu do Java chủ động gửi xuống</h3>
+    <p>Dữ liệu nhận được: <span id="java-output"></span></p>
+    <div>
+        <input type="text" id="txtTitleTo" value="Main"><br/>
+        <input type="text" id="txtType" value="send-inbox"><br/>
+        <input type="text" id="txtMessage"><br/>
+        <button onclick="sendInbox()">Gửi tin nhắn</button>
+    </div>
+</div>
+<button onclick="sendBroadcast()">send broadcast</button>
+<script>
+
+    function sendBroadcast() {
+        window.cefQuery({
+            request: JSON.stringify(['broadcast', 'abc', {name: 'abc'}])
+        })
+    }
+
+    function sendInbox() {
+        let titleTo = document.getElementById("txtTitleTo").value;
+        let type = document.getElementById("txtType").value;
+        let message = document.getElementById("txtMessage").value;
+        window.cefQuery({
+            request: JSON.stringify(["inbox", titleTo, type, message]),
+            onSuccess: function (response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function onCefMessage(type, message) {
+        if(typeof message === 'object') message = JSON.stringify(message);
+        document.getElementById('java-output').innerText = type + ' - ' + message;
+    }
+
+    function onCefBroadcastMessage(from, topic, data) {
+        alert('from=' + JSON.stringify(from) + ', topic=' + topic + ', data=' + data)
+    }
+</script>
+</body>
+</html>

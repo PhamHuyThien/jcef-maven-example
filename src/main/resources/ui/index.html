@@ -4,11 +4,36 @@
     <meta charset="UTF-8">
     <title>JCEF Frontend</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; }
-        button { padding: 10px 15px; margin: 5px; font-size: 14px; cursor: pointer; }
-        .box { border: 1px solid #ccc; padding: 15px; background: white; margin-top: 15px; border-radius: 5px; }
-        #output { color: blue; font-weight: bold; }
-        #java-output { color: green; font-weight: bold; }
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            background: white;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+
+        #output {
+            color: blue;
+            font-weight: bold;
+        }
+
+        #java-output {
+            color: green;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -31,15 +56,27 @@
 
 <!-- 3. Nơi hiển thị khi Java chủ động gọi JS -->
 <div class="box">
-    <h3>Chiều 2: Lắng nghe dữ liệu do Java chủ động gửi xuống</h3>
-    <p>Dữ liệu nhận được: <span id="java-output">Đang đợi Java bấm nút...</span></p>
+    <h3>Tin nhắn riêng: Lắng nghe dữ liệu do Java chủ động gửi xuống</h3>
+    <p>Dữ liệu nhận được: <span id="java-output"></span></p>
+    <div>
+        <label for="slTitleTo">Chọn cửa sổ (bấm Lấy danh sách cửa sổ)</label></br>
+        <select id="slTitleTo">
+            <option value="">-- Chọn cửa sổ --</option>
+        </select><br/>
+        <input type="text" id="txtType" value="send-inbox"><br/>
+        <input type="text" id="txtMessage"><br/>
+        <button onclick="sendInbox()">Gửi tin nhắn</button>
+    </div>
 </div>
 <div>
     <a href="b.html">chuyển trang</a>
     <a href="tailwind.html">chuyển trang</a>
     <a href="khong-co.html">chuyển trang 404</a>
     <button onclick="sendBroadcast()">send broadcast</button>
-    <button onclick="showJcefWindow()">show jcef window</button>
+    <button onclick="showJcefFrame()">show jcef window</button>
+    <button onclick="switchScreen()">Chuyển trang cho màn phụ</button>
+    <button onclick="getJcefFrameList()">Lấy danh sách cửa sổ</button>
+    <button onclick="getThisFrame()">Lấy thông tin cửa sổ này</button>
 </div>
 <script>
     // --- CHIỀU 1: JS gọi Java bằng hàm window.cefQuery ---
@@ -49,11 +86,11 @@
         // window.cefQuery được JCEF tự động tiêm vào môi trường trình duyệt
         window.cefQuery({
             request: JSON.stringify(['sayHello', {name}]),
-            onSuccess: function(response) {
+            onSuccess: function (response) {
                 // Nhận kết quả từ callback.success() trong Java
                 document.getElementById('output').innerText = response;
             },
-            onFailure: function(error_code, error_message) {
+            onFailure: function (error_code, error_message) {
                 console.error("Lỗi:", error_message);
             }
         });
@@ -62,16 +99,25 @@
     function triggerJavaUI() {
         window.cefQuery({
             request: JSON.stringify(["triggerJavaAction"]),
-            onSuccess: function(response) {
+            onSuccess: function (response) {
                 console.log(response);
             }
         });
     }
 
-    function showJcefWindow(){
+    function showJcefFrame() {
         window.cefQuery({
-            request: JSON.stringify(["showJcefWindow"]),
-            onSuccess: function(response) {
+            request: JSON.stringify(["showJcefFrame", 'Secondary']),
+            onSuccess: function (response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function switchScreen() {
+        window.cefQuery({
+            request: JSON.stringify(["switchScreen", 'Secondary', '500']),
+            onSuccess: function (response) {
                 console.log(response);
             }
         });
@@ -83,8 +129,51 @@
         })
     }
 
+    function getJcefFrameList() {
+        window.cefQuery({
+            request: JSON.stringify(["getJcefFrameList"]),
+            onSuccess: function (response) {
+                let list = JSON.parse(response);
+                const select = document.getElementById("slTitleTo");
+                select.innerText = '';
+                for (let l of list) {
+                    const option = document.createElement("option");
+                    option.value = l.title;
+                    option.textContent = l.title + ' - ' + l.id;
+                    select.appendChild(option);
+                }
+            }
+        });
+    }
+
+    function sendInbox() {
+        let titleTo = document.getElementById("slTitleTo").value;
+        let type = document.getElementById("txtType").value;
+        let message = document.getElementById("txtMessage").value;
+        window.cefQuery({
+            request: JSON.stringify(["inbox", titleTo, type, {msg: message}]),
+            onSuccess: function (response) {
+                if (response === 'true') alert('Gui tin nhan rieng thanh cong');
+                else alert('Gui tin nhan rieng that bai');
+            },
+            onFailure: function (error_code, error_message) {
+                alert('Gui tin nhan rieng that bai - ' + error_message);
+            }
+        });
+    }
+
+    function getThisFrame() {
+        window.cefQuery({
+            request: JSON.stringify(["getThisFrame"]),
+            onSuccess: function (response) {
+                alert(response);
+            },
+        });
+    }
+
     function onCefMessage(type, message) {
-        document.getElementById('java-output').innerText = message;
+        if (typeof message === 'object') message = JSON.stringify(message);
+        document.getElementById('java-output').innerText = type + ' - ' + message;
     }
 
     function onCefBroadcastMessage(from, topic, data) {

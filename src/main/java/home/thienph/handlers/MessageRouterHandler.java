@@ -2,7 +2,7 @@ package home.thienph.handlers;
 
 import home.thienph.dispatchers.CefMessageDispatcher;
 import home.thienph.exceptions.ResponseException;
-import home.thienph.jcefs.JcefWindow;
+import home.thienph.jcefs.JcefFrame;
 import home.thienph.managers.JcefManager;
 import home.thienph.utils.JsonUtils;
 import home.thienph.utils.StringUtils;
@@ -24,7 +24,7 @@ public class MessageRouterHandler extends CefMessageRouterHandlerAdapter {
         int status = 0;
         String response;
         try {
-            JcefWindow window = JcefManager.getWindow(browser);
+            JcefFrame window = JcefManager.getJcefFrame(browser);
             Object[] data = JsonUtils.fromJson(request, Object[].class);
             Object result = CefMessageDispatcher.dispatch(window, data);
             response = StringUtils.normalizeToString(result);

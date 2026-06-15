@@ -1,7 +1,6 @@
 package home.thienph;
 
 import home.thienph.dispatchers.CefMessageDispatcher;
-import home.thienph.jcefs.JcefWindow;
 import home.thienph.managers.AppLockManager;
 import home.thienph.managers.JcefManager;
 import home.thienph.servers.LocalServer;
@@ -47,12 +46,9 @@ public class Main {
 
     private static void shutdownHook() {
         long currentTime = System.currentTimeMillis();
-        log.info("Shutting down localserver at port {} ...", server.getPort());
+        log.info("Shutting down ...");
         server.stop();
-        for (JcefWindow jcefWindow : JcefManager.getJcefWindows()) {
-            log.info("Shutting down jcef window id {} ...", jcefWindow.getId());
-            jcefWindow.stop();
-        }
+        JcefManager.closeJcefFrames();
         AppLockManager.releaseLock();
         log.info("Shutting down completed - total {} ms", System.currentTimeMillis() - currentTime);
         Runtime.getRuntime().halt(0);

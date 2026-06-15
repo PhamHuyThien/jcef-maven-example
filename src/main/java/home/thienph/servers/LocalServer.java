@@ -2,6 +2,7 @@ package home.thienph.servers;
 
 import com.sun.net.httpserver.HttpServer;
 import home.thienph.handlers.LocalHttpHandler;
+import home.thienph.utils.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -40,20 +41,23 @@ public class LocalServer {
         }
     }
 
-    public String getOrigin() {
+    public String getLocationOrigin() {
         return protocol + "://" + host + ":" + port;
     }
 
     public String getUrlByFilePath(String filePath) {
-        return getOrigin() + "/" + filePath;
+        return getLocationOrigin() + "/" + filePath;
     }
 
     public String getUrlByKey(String key) {
-        String filePath = key.replace(".", "/") + ".html";
+        String filePath = StringUtils.EMPTY;
+        if (key != null && !key.isBlank()) {
+            filePath = key.replace(".", "/") + ".html";
+        }
         return getUrlByFilePath(filePath);
     }
 
     public String getUrl() {
-        return getUrlByKey("index");
+        return getUrlByKey(StringUtils.EMPTY);
     }
 }

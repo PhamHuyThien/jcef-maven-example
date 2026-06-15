@@ -89,4 +89,24 @@ public class ClassUtils {
             }
         }
     }
+
+    /**
+     * Hàm Helper: Nếu thiếu dữ liệu, ép về null đối với Object.
+     * Nhưng đối với kiểu nguyên thủy (primitive) như int, boolean, long... thì PHẢI gán giá trị mặc định (0, false)
+     * nếu không Java Reflection sẽ ném lỗi IllegalArgumentException khi invoke.
+     */
+    public static Object getDefaultValueForPrimitive(Class<?> type) {
+        if (!type.isPrimitive()) {
+            return null; // Các kiểu Object (String, DTO, List...) thiếu thì thoải mái để null
+        }
+        if (type == boolean.class) return false;
+        if (type == int.class) return 0;
+        if (type == long.class) return 0L;
+        if (type == double.class) return 0.0;
+        if (type == float.class) return 0.0f;
+        if (type == char.class) return '\u0000';
+        if (type == byte.class) return (byte) 0;
+        if (type == short.class) return (short) 0;
+        return null;
+    }
 }
