@@ -79,7 +79,7 @@
 
     function sendBroadcast() {
         window.cefQuery({
-            request: JSON.stringify(['broadcast', 'abc', {name: 'thien'}])
+            request: JSON.stringify(['broadcast', 'abc', 'pham huy thien'])
         })
     }
 
@@ -87,8 +87,8 @@
         document.getElementById('java-output').innerText = message;
     }
 
-    function onBroadcastMessage(topic, data) {
-        alert('topic=' + topic + ', data=' + JSON.stringify(data))
+    function onCefBroadcastMessage(from, topic, data) {
+        alert('from=' + JSON.stringify(from) + ', topic=' + topic + ', data=' + JSON.stringify(data))
     }
 </script>
 </body>

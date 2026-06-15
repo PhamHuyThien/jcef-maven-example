@@ -11,12 +11,12 @@
 
     function sendBroadcast() {
         window.cefQuery({
-            request: JSON.stringify(['broadcast', 'abc', '123'])
+            request: JSON.stringify(['broadcast', 'abc', {name: 'abc'}])
         })
     }
 
-    function onBroadcastMessage(topic, data) {
-        alert('topic=' + topic + ', data=' + JSON.stringify(data))
+    function onCefBroadcastMessage(from, topic, data) {
+        alert('from=' + JSON.stringify(from) + ', topic=' + topic + ', data=' + JSON.stringify(data))
     }
 </script>
 </body>

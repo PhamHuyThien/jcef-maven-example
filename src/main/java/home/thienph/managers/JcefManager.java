@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 @Slf4j
 public class JcefManager {
     @Getter
     public static List<JcefWindow> jcefWindows = new ArrayList<>();
     private static final Map<CefBrowser, JcefWindow> jcefWindowsMap = new ConcurrentHashMap<>();
-    private static final List<Consumer<CefEvent>> jcefEventConsumers = new CopyOnWriteArrayList<>();
+    private static final List<BiConsumer<JcefWindow, CefEvent>> jcefEventConsumers = new CopyOnWriteArrayList<>();
 
     public static void init() {
         JcefWindow jcefWindow = new JcefWindow(Main.getServer().getUrl());
@@ -65,20 +65,20 @@ public class JcefManager {
         return browser != null ? jcefWindowsMap.get(browser) : null;
     }
 
-    public static void registerEvent(Consumer<CefEvent> subscriber) {
+    public static void registerEvent(BiConsumer<JcefWindow, CefEvent> subscriber) {
         if (!jcefEventConsumers.contains(subscriber)) {
             jcefEventConsumers.add(subscriber);
         }
     }
 
-    public static void unregisterEvent(Consumer<CefEvent> subscriber) {
+    public static void unregisterEvent(BiConsumer<JcefWindow, CefEvent> subscriber) {
         jcefEventConsumers.remove(subscriber);
     }
 
-    public static void postEvent(CefEvent event) {
-        for (Consumer<CefEvent> subscriber : jcefEventConsumers) {
+    public static void postEvent(JcefWindow jcefWindow, CefEvent event) {
+        for (BiConsumer<JcefWindow, CefEvent> subscriber : jcefEventConsumers) {
             try {
-                subscriber.accept(event);
+                subscriber.accept(jcefWindow, event);
             } catch (Exception e) {
                 log.error("post event error: {}", e.getMessage(), e);
             }

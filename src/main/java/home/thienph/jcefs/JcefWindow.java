@@ -1,7 +1,9 @@
 package home.thienph.jcefs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import home.thienph.data.cefs.CefEvent;
 import home.thienph.managers.JcefManager;
+import home.thienph.utils.JsonUtils;
 import home.thienph.utils.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 @Slf4j
 @Getter
@@ -65,8 +67,11 @@ public class JcefWindow {
     @Setter
     boolean openDevTools = false;
 
+    @JsonIgnore
     CefClient client;
+    @JsonIgnore
     CefBrowser browser;
+    @JsonIgnore
     Component component;
 
     @Setter
@@ -79,15 +84,20 @@ public class JcefWindow {
     boolean resizable = true;
     @Setter
     boolean isMain;
+    @JsonIgnore
     JFrame frame;
 
+    @JsonIgnore
     CefMessageRouter messageRouter;
     @Setter
+    @JsonIgnore
     CefMessageRouter.CefMessageRouterConfig messageRouterConfig;
+    @JsonIgnore
     List<CefMessageRouterHandlerAdapter> messageRouterHandlers;
+    @JsonIgnore
     List<CefLoadHandlerAdapter> loadHandlerAdapters;
-
-    private Consumer<CefEvent> eventBusListener;
+    @JsonIgnore
+    private BiConsumer<JcefWindow, CefEvent> eventBusListener;
 
     public JcefWindow(String url) {
         this.url = url;
@@ -118,9 +128,9 @@ public class JcefWindow {
         browser = client.createBrowser(url, false, false);
         component = browser.getUIComponent();
 
-        this.eventBusListener = (event) -> {
+        this.eventBusListener = (jcefWindow, event) -> {
             if (!event.getId().equals(this.id)) {
-                this.broadcastMessage(event.getTopic(), event.getData());
+                this.broadcastMessage(jcefWindow, event.getTopic(), event.getData());
             }
         };
         JcefManager.registerEvent(this.eventBusListener);
@@ -161,7 +171,7 @@ public class JcefWindow {
 
     public void broadcastEvent(String topic, Object data) {
         CefEvent event = new CefEvent(this.id, topic, data);
-        JcefManager.postEvent(event);
+        JcefManager.postEvent(this, event);
     }
 
     public void sendCefMessage(String type, Object data) {
@@ -170,9 +180,10 @@ public class JcefWindow {
         browser.executeJavaScript(jsScript, "app://jcef.js", 0);
     }
 
-    public void broadcastMessage(String topic, Object data) {
-        String res = StringUtils.normalizeToString(data);
-        String jsScript = String.format("window.onBroadcastMessage('%s', %s)", topic, res);
+    public void broadcastMessage(JcefWindow jcefWindow, String topic, Object data) {
+        String from = JsonUtils.toJson(jcefWindow);
+        String res = JsonUtils.toJson(data);
+        String jsScript = String.format("window.onCefBroadcastMessage(%s, '%s', %s)", from, topic, res);
         browser.executeJavaScript(jsScript, "app://jcef.js", 0);
     }
 
