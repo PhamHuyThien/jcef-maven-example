@@ -1,9 +1,9 @@
 package home.thienph.handlers;
 
 import home.thienph.dispatchers.CefMessageDispatcher;
-import home.thienph.managers.CefWindowManager;
 import home.thienph.exceptions.ResponseException;
 import home.thienph.jcefs.JcefWindow;
+import home.thienph.managers.JcefManager;
 import home.thienph.utils.JsonUtils;
 import home.thienph.utils.StringUtils;
 import lombok.Getter;
@@ -17,16 +17,16 @@ import org.cef.handler.CefMessageRouterHandlerAdapter;
 public class MessageRouterHandler extends CefMessageRouterHandlerAdapter {
 
     @Getter
-    public static final MessageRouterHandler instance = new MessageRouterHandler();
+    private static final MessageRouterHandler instance = new MessageRouterHandler();
 
     @Override
     public boolean onQuery(CefBrowser browser, CefFrame frame, long queryId, String request, boolean persistent, CefQueryCallback callback) {
         int status = 0;
         String response;
         try {
-            JcefWindow window = CefWindowManager.getWindow(browser);
+            JcefWindow window = JcefManager.getWindow(browser);
             Object[] data = JsonUtils.fromJson(request, Object[].class);
-            Object result = CefMessageDispatcher.getInstance().dispatch(window, data);
+            Object result = CefMessageDispatcher.dispatch(window, data);
             response = StringUtils.normalizeToString(result);
         } catch (ResponseException e) {
             status = e.getStatus();

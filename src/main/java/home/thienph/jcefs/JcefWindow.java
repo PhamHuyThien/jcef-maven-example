@@ -1,7 +1,7 @@
 package home.thienph.jcefs;
 
 import home.thienph.data.cefs.CefEvent;
-import home.thienph.managers.CefWindowManager;
+import home.thienph.managers.JcefManager;
 import home.thienph.utils.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -70,7 +70,7 @@ public class JcefWindow {
     Component component;
 
     @Setter
-    String title = "JCefUI";
+    String title;
     @Setter
     int width = 800;
     @Setter
@@ -91,7 +91,8 @@ public class JcefWindow {
 
     public JcefWindow(String url) {
         this.url = url;
-        this.id = UUID.randomUUID().toString();
+        id = UUID.randomUUID().toString();
+        title = id;
         messageRouterConfig = new CefMessageRouter.CefMessageRouterConfig(QUERY_FUNC_NAME, QUERY_CANCEL_FUNC_NAME);
         messageRouterHandlers = new ArrayList<>();
         loadHandlerAdapters = new ArrayList<>();
@@ -122,8 +123,8 @@ public class JcefWindow {
                 this.broadcastMessage(event.getTopic(), event.getData());
             }
         };
-        CefEventBus.getInstance().register(this.eventBusListener);
-        CefWindowManager.register(browser, this);
+        JcefManager.registerEvent(this.eventBusListener);
+        JcefManager.registerBrowser(browser, this);
 
         frame = new JFrame(title);
         frame.setSize(width, height);
@@ -131,28 +132,28 @@ public class JcefWindow {
         else frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setResizable(resizable);
+        frame.add(component, BorderLayout.CENTER);
     }
 
     public void show() {
-        if (frame != null && component != null) {
-            frame.add(component, BorderLayout.CENTER);
-            frame.setVisible(true);
+        show(true);
+    }
+
+    public void show(boolean show) {
+        if (frame != null) {
+            frame.setVisible(show);
         }
     }
 
     public void stop() {
         if (browser == null) return;
-
-        CefWindowManager.unregister(browser);
-
+        JcefManager.unregisterBrowser(browser);
         if (this.eventBusListener != null) {
-            CefEventBus.getInstance().unregister(this.eventBusListener);
+            JcefManager.unregisterEvent(this.eventBusListener);
         }
-
         browser.stopLoad();
         browser.close(true);
         client.dispose();
-
         if (isMain) {
             app.dispose();
         }
@@ -160,7 +161,7 @@ public class JcefWindow {
 
     public void broadcastEvent(String topic, Object data) {
         CefEvent event = new CefEvent(this.id, topic, data);
-        CefEventBus.getInstance().post(event);
+        JcefManager.postEvent(event);
     }
 
     public void sendCefMessage(String type, Object data) {

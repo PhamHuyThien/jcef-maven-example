@@ -37,7 +37,9 @@
 <div>
     <a href="b.html">chuyển trang</a>
     <a href="tailwind.html">chuyển trang</a>
+    <a href="khong-co.html">chuyển trang 404</a>
     <button onclick="sendBroadcast()">send broadcast</button>
+    <button onclick="showJcefWindow()">show jcef window</button>
 </div>
 <script>
     // --- CHIỀU 1: JS gọi Java bằng hàm window.cefQuery ---
@@ -60,6 +62,15 @@
     function triggerJavaUI() {
         window.cefQuery({
             request: JSON.stringify(["triggerJavaAction"]),
+            onSuccess: function(response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function showJcefWindow(){
+        window.cefQuery({
+            request: JSON.stringify(["showJcefWindow"]),
             onSuccess: function(response) {
                 console.log(response);
             }

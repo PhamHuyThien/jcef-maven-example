@@ -4,11 +4,12 @@ import home.thienph.anotations.CefController;
 import home.thienph.anotations.OnCefMessage;
 import home.thienph.data.dto.SayHelloReq;
 import home.thienph.jcefs.JcefWindow;
+import home.thienph.managers.JcefManager;
 
 import javax.swing.*;
 
 @CefController
-public class ExampleController {
+public class AppController {
 
     @OnCefMessage("sayHello")
     public String sayHello(JcefWindow window, SayHelloReq req) {
@@ -21,6 +22,11 @@ public class ExampleController {
         SwingUtilities.invokeLater(() -> {
             javax.swing.JOptionPane.showMessageDialog(null, "Anh yeu em");
         });
+    }
+
+    @OnCefMessage("showJcefWindow")
+    public void showJcefWindow(JcefWindow window) {
+        JcefManager.getJcefWindows().get(1).show();
     }
 
     @OnCefMessage("broadcast")

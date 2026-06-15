@@ -1,5 +1,7 @@
 package home.thienph.utils;
 
+import lombok.SneakyThrows;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -15,7 +17,8 @@ public class ClassUtils {
     /**
      * Hàm chính: Tìm kiếm tất cả các class trong package (Hỗ trợ cả IDE và File JAR)
      */
-    public static Set<Class<?>> findClasses(String basePackage) throws Exception {
+    @SneakyThrows
+    public static Set<Class<?>> findClasses(String basePackage) {
         Set<Class<?>> classes = new HashSet<>();
         String path = basePackage.replace('.', '/');
 
