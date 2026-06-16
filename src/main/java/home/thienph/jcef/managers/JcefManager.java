@@ -36,14 +36,23 @@ public class JcefManager {
     private static final List<BiConsumer<JcefFrame, CefEvent>> jcefEventConsumers = new CopyOnWriteArrayList<>();
 
     static {
-        builder = new CefAppBuilder();
-        builder.setInstallDir(new File(JCEF_BUNDLE_PATH));
-        builder.getCefSettings().windowless_rendering_enabled = false;
-        builder.addJcefArgs("--disable-gpu", "--disable-webgl", "--no-sandbox");
         try {
-            if (CefApp.getState() == CefApp.CefAppState.INITIALIZED)
-                app = CefApp.getInstance();
-            else app = builder.build();
+            builder = new CefAppBuilder();
+            builder.setInstallDir(new File(JCEF_BUNDLE_PATH));
+            builder.getCefSettings().windowless_rendering_enabled = false;
+            builder.getCefSettings().background_color = builder.getCefSettings().new ColorType(255, 255, 255, 255);
+            builder.addJcefArgs(
+                    "--disable-gpu",
+                    "--disable-webgl",
+                    "--no-sandbox",
+                    "--disable-web-security",
+                    "--allow-running-insecure-content"
+            );
+            if (CefApp.getState() == CefApp.CefAppState.INITIALIZED) {
+                app = CefApp.getInstance(builder.getCefSettings());
+            } else {
+                app = builder.build();
+            }
         } catch (IOException | UnsupportedPlatformException | InterruptedException | CefInitializationException e) {
             throw new RuntimeException(e);
         }
@@ -51,7 +60,7 @@ public class JcefManager {
 
     public static void init() {
         JcefManager.createJcefFrame("Main", JcefUIMain.getServer().getUrl(), true);
-        JcefManager.createJcefFrame("Secondary", JcefUIMain.getServer().getUrlByKey("index2"), 400, 300, false, true);
+        JcefManager.createJcefFrame("Secondary", JcefUIMain.getServer().getUrlByKey("index2"), 400, 300, false, false);
     }
 
     public static JcefFrame createJcefFrame(String title, String source) {
