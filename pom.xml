@@ -64,7 +64,7 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>home.thienph.jcef.Main</mainClass>
+                                    <mainClass>home.thienph.jcef.JcefUIMain</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -89,13 +89,13 @@
                     <proguardInclude>${basedir}/proguard.pro</proguardInclude>
                     <libs>
                         <!-- Liên kết với thư viện JDK 17 đang chạy -->
-                        <lib>${java.home}/lib/jrt-fs.jar</lib>
-                        <lib>${java.home}/jmods/java.base.jmod</lib>
-                        <lib>${java.home}/jmods/java.desktop.jmod</lib>
-                        <lib>${java.home}/jmods/java.logging.jmod</lib>
-                        <lib>${java.home}/jmods/java.sql.jmod</lib>
-                        <lib>${java.home}/jmods/java.net.http.jmod</lib>
-                        <lib>${java.home}/jmods/jdk.httpserver.jmod</lib>
+                        <lib>${basedir}/lib/jrt-fs.jar</lib>
+                        <lib>${basedir}/jmods/java.base.jmod</lib>
+                        <lib>${basedir}/jmods/java.desktop.jmod</lib>
+                        <lib>${basedir}/jmods/java.logging.jmod</lib>
+                        <lib>${basedir}/jmods/java.sql.jmod</lib>
+                        <lib>${basedir}/jmods/java.net.http.jmod</lib>
+                        <lib>${basedir}/jmods/jdk.httpserver.jmod</lib>
                     </libs>
                 </configuration>
             </plugin>
@@ -118,7 +118,7 @@
                             <jar>${project.build.directory}/${project.artifactId}-${project.version}.jar</jar>
                             <!-- Tên lớp chứa hàm main của bạn -->
                             <classPath>
-                                <mainClass>home.thienph.jcef.Main</mainClass>
+                                <mainClass>home.thienph.jcef.JcefUIMain</mainClass>
                                 <addDependencies>false</addDependencies>
                             </classPath>
                             <!-- Cấu hình yêu cầu phiên bản Java tối thiểu trên máy khách -->

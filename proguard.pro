@@ -31,7 +31,7 @@
 # ====================================================================
 # 4. GIỮ LẠI LỚP MAIN ĐỂ FILE EXE/JAR CHẠY ĐƯỢC
 # ====================================================================
--keep public class home.thienph.jcef.Main {
+-keep public class home.thienph.jcef.JcefUIMain {
     public static void main(java.lang.String[]);
 }
 

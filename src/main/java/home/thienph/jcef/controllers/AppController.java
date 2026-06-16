@@ -1,6 +1,6 @@
 package home.thienph.jcef.controllers;
 
-import home.thienph.jcef.Main;
+import home.thienph.jcef.JcefUIMain;
 import home.thienph.jcef.anotations.CefController;
 import home.thienph.jcef.anotations.OnCefMessage;
 import home.thienph.jcef.data.dto.SayHelloReq;
@@ -34,7 +34,7 @@ public class AppController {
     @OnCefMessage("switchScreen")
     public void switchScreen(String title, String keySwitch) {
         JcefManager.getJcefFrameByTitle(title).forEach(JcefFrame -> {
-            JcefFrame.getBrowser().loadURL(Main.getServer().getUrlByKey(keySwitch));
+            JcefFrame.getBrowser().loadURL(JcefUIMain.getServer().getUrlByKey(keySwitch));
             JcefFrame.setTitle("Anh thien dep trai");
         });
     }

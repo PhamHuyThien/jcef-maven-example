@@ -1,3 +1,3 @@
 @echo off
-java -jar jcef-ui-1.0-SNAPSHOT.jar
+"%~dp0jre\bin\java.exe" -jar "%~dp0jcef-ui-1.0-SNAPSHOT.jar"
 pause

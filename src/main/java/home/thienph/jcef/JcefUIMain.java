@@ -14,17 +14,17 @@ import javax.swing.*;
 import java.util.Set;
 
 @Slf4j
-public class Main {
+public class JcefUIMain {
 
     public static final String TEMP_DIR = System.getProperty("java.io.tmpdir");
     public static final String APP_DIR = System.getProperty("user.dir");
 
     @Getter
-    private static final Set<Class<?>> allClasses = ClassUtils.findClasses(Main.class.getPackageName());
+    private static final Set<Class<?>> allClasses = ClassUtils.findClasses(JcefUIMain.class.getPackageName());
     @Getter
     private static final LocalServer server = new LocalServer();
     @Getter
-    private static final Thread shutdownHook = ThrUtils.newNamedThread("shutdown", Main::shutdownHook);
+    private static final Thread shutdownHook = ThrUtils.newNamedThread("shutdown", JcefUIMain::shutdownHook);
 
 
     public static void main(String[] args) {

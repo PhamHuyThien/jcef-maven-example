@@ -1,6 +1,6 @@
 package home.thienph.jcef.dispatchers;
 
-import home.thienph.jcef.Main;
+import home.thienph.jcef.JcefUIMain;
 import home.thienph.jcef.anotations.CefController;
 import home.thienph.jcef.anotations.OnCefMessage;
 import home.thienph.jcef.exceptions.ResponseException;
@@ -21,7 +21,7 @@ public class CefMessageDispatcher {
 
     public static void init() {
         try {
-            for (Class<?> clazz : Main.getAllClasses()) {
+            for (Class<?> clazz : JcefUIMain.getAllClasses()) {
                 if (!clazz.isAnnotationPresent(CefController.class)) continue;
                 Object instance = clazz.getDeclaredConstructor().newInstance();
                 for (Method method : clazz.getDeclaredMethods()) {
@@ -31,7 +31,7 @@ public class CefMessageDispatcher {
                     handlers.put(key, new HandlerMethod(instance, method));
                 }
             }
-            log.info("Scan total {} CefController / {} total class!!!", handlers.size(), Main.getAllClasses().size());
+            log.info("Scan total {} CefController / {} total class!!!", handlers.size(), JcefUIMain.getAllClasses().size());
         } catch (Exception e) {
             throw new RuntimeException("Scan CefController failed", e);
         }

@@ -1,6 +1,6 @@
 package home.thienph.jcef.managers;
 
-import home.thienph.jcef.Main;
+import home.thienph.jcef.JcefUIMain;
 import home.thienph.jcef.data.cefs.CefEvent;
 import home.thienph.jcef.handlers.MessageRouterHandler;
 import home.thienph.jcef.jcefs.JcefFrame;
@@ -50,8 +50,8 @@ public class JcefManager {
     }
 
     public static void init() {
-        JcefManager.createJcefFrame("Main", Main.getServer().getUrl(), true);
-        JcefManager.createJcefFrame("Secondary", Main.getServer().getUrlByKey("index2"), 400, 300, false, true);
+        JcefManager.createJcefFrame("Main", JcefUIMain.getServer().getUrl(), true);
+        JcefManager.createJcefFrame("Secondary", JcefUIMain.getServer().getUrlByKey("index2"), 400, 300, false, true);
     }
 
     public static JcefFrame createJcefFrame(String title, String source) {

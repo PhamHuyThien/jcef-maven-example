@@ -1,6 +1,6 @@
 package home.thienph.jcef.managers;
 
-import home.thienph.jcef.Main;
+import home.thienph.jcef.JcefUIMain;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -15,7 +15,7 @@ public class AppLockManager {
 
     public static boolean isAppAlreadyRunning() {
         try {
-            File lockFile = new File(Main.TEMP_DIR, "jcef.app.lock");
+            File lockFile = new File(JcefUIMain.TEMP_DIR, "jcef.app.lock");
             if (!lockFile.getParentFile().exists()) {
                 lockFile.getParentFile().mkdirs();
             }
